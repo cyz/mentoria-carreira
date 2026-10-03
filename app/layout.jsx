@@ -7,7 +7,7 @@ const plexMono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '600'], var
 export const metadata = {
   title: 'Meu Plano de Carreira · Mentoria WoMakersCode',
   description:
-    'Exercícios da mentoria de carreira WoMakersCode: Radar de carreira, Career Gap, 30-60-90, Matriz Impacto × Esforço e Experimentos de carreira.',
+    'Ferramentas da mentoria de carreira WoMakersCode para definir objetivos, identificar oportunidades de desenvolvimento e criar um plano de ação.',
 };
 
 export const viewport = { themeColor: '#16181b' };

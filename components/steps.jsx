@@ -43,8 +43,8 @@ function Inicio() {
         ].map(([t, s]) => <li key={t}><b>{t}</b><span>{s}</span></li>)}
       </ol>
       <Dica titulo="Como funciona">
-        Responda com frases curtas e honestas. Rascunho vale! Suas respostas são salvas automaticamente neste navegador e,
-        no final, você baixa um PDF com o seu plano.
+        Responda com frases curtas e honestas — não é preciso ter tudo definido agora. Seu progresso é salvo
+        automaticamente e, ao final, você poderá baixar um PDF com o plano completo.
       </Dica>
     </>
   );
@@ -55,7 +55,7 @@ function Radar() {
   return (
     <>
       <Cabecalho num="01" kicker="Ferramenta · Radar de carreira" titulo="Onde quero chegar?">
-        Responda cada dimensão e marque o quanto ela está <b>clara para você hoje</b> (1 = nada clara, 5 = muito clara).
+        Reflita sobre cada dimensão e indique o quanto ela está <b>clara para você hoje</b> (1 = nada clara; 5 = muito clara).
       </Cabecalho>
       <div className="radar-layout">
         <div className="radar-fields">
@@ -76,12 +76,12 @@ function Radar() {
         <div className="radar-side">
           <div className="card card--sticky">
             <RadarChart />
-            <p className="muted small">As dimensões com nota baixa são ótimos temas para a conversa e para seus experimentos.</p>
+            <p className="muted small">As dimensões com menor pontuação podem orientar suas conversas e seus experimentos.</p>
           </div>
         </div>
       </div>
       <Dica>
-        Não escolha uma carreira olhando apenas para aquilo que você gosta. Tente encontrar a interseção entre{' '}
+        Não escolha uma carreira considerando apenas o que você gosta. Busque a interseção entre{' '}
         <b>o que você gosta</b>, <b>o que você consegue desenvolver</b> e <b>onde existe uma oportunidade real</b>.
       </Dica>
       <div className="card card--accent">
@@ -97,7 +97,7 @@ function Hoje() {
   return (
     <>
       <Cabecalho num="02" kicker="Diagnóstico" titulo="Onde estou hoje?">
-        Olhe para o seu momento atual sem julgamento: tudo que você já viveu conta.
+        Observe seu momento atual sem julgamentos: todas as suas experiências fazem parte dessa trajetória.
       </Cabecalho>
       <div className="card">
         <Campo path="hoje.situacao" label="Meu momento atual" placeholder="Ex.: analista administrativa há 4 anos, estudando programação" />
@@ -107,8 +107,8 @@ function Hoje() {
         <div className="card"><Campo path="hoje.falta" label="O que está faltando?" rows={6} placeholder="Conhecimentos, experiências, contatos, evidências…" /></div>
       </div>
       <Dica>
-        Competências “de outra área” costumam ser transferíveis: comunicação, organização, negociação e resolução de
-        problemas valem em qualquer carreira.
+        Competências desenvolvidas em outras áreas podem ser transferíveis. Comunicação, organização, negociação e
+        resolução de problemas, por exemplo, são relevantes em diferentes carreiras.
       </Dica>
     </>
   );
@@ -119,7 +119,7 @@ function Gap() {
   return (
     <>
       <Cabecalho num="03" kicker="Ferramenta · Career Gap" titulo="Encontre seu Career Gap">
-        Onde estou → Onde quero chegar → O que falta entre os dois?
+        Compare seu momento atual com o objetivo profissional e identifique o que precisa ser desenvolvido.
       </Cabecalho>
       <div className="flow">
         <div className="flow__item">
@@ -131,11 +131,11 @@ function Gap() {
           <Campo path="cargoAlvo" label={<span className="mono">Onde quero chegar</span>} placeholder="Cargo ou papel desejado" />
         </div>
         <div className="flow__arrow" aria-hidden="true">→</div>
-        <div className="flow__item flow__item--accent"><span className="mono">O que falta?</span><p>Descubra olhando o mercado ↓</p></div>
+        <div className="flow__item flow__item--accent"><span className="mono">O que falta?</span><p>Investigue as demandas do mercado ↓</p></div>
       </div>
       <Dica titulo="Dica prática">
-        Antes de colocar “fazer um curso” no seu plano, olhe para <b>5 vagas</b> do cargo que você quer. Veja o que
-        aparece repetidamente nos requisitos.
+        Antes de incluir “fazer um curso” no plano, analise <b>5 vagas</b> relacionadas ao cargo desejado e identifique
+        os requisitos mais recorrentes.
       </Dica>
       <div className="pipeline mono" aria-hidden="true">
         <span>5 vagas</span>→<span>requisitos recorrentes</span>→<span>3 competências prioritárias</span>→<span>plano de desenvolvimento</span>
@@ -218,7 +218,7 @@ function Acao() {
   return (
     <>
       <Cabecalho num="04" kicker="Ferramenta · 30-60-90" titulo="Transforme o gap em ação">
-        Um plano pequeno que você cumpre vale mais que um PDI gigantesco.
+        Um plano objetivo e viável gera mais resultados do que um PDI extenso e difícil de executar.
       </Cabecalho>
       <h2 className="h2">Objetivo → Gap → Ação → Evidência → Prazo</h2>
       <div className="chain">
@@ -233,11 +233,11 @@ function Acao() {
       <p className="muted">Até {MAX_POR_FASE} ações por fase. Clique nos exemplos para adicionar ou escreva as suas.</p>
       <div className="fases">{FASES.map((f) => <Fase key={f.id} fase={f} />)}</div>
       {cursos >= 3 && (
-        <Dica titulo="Atenção">Você tem {cursos} ações ligadas a cursos. Que tal trocar alguma por prática ou evidência?</Dica>
+        <Dica titulo="Atenção">Você incluiu {cursos} ações relacionadas a cursos. Considere substituir alguma delas por prática ou produção de evidências.</Dica>
       )}
       <Dica>
-        <b>Não transforme seu plano de carreira em uma lista infinita de cursos.</b> Para quem está em transição, prática e
-        evidência contam muito.
+        <b>Evite transformar seu plano de carreira em uma lista extensa de cursos.</b> Em uma transição, experiências
+        práticas e evidências concretas também são fundamentais.
       </Dica>
     </>
   );
@@ -265,7 +265,7 @@ function Matriz() {
   return (
     <>
       <Cabecalho num="05" kicker="Ferramenta · Matriz de prioridade" titulo="Não tente fazer tudo">
-        Qual dessas ações tem <b>maior impacto</b> na minha carreira e <b>menor esforço</b> para começar?
+        Avalie quais ações podem gerar <b>maior impacto</b> na sua carreira com <b>menor esforço</b> inicial.
       </Cabecalho>
       <div className="matriz-layout">
         <div>
@@ -304,8 +304,8 @@ function Matriz() {
       <ResumoQuadrantes />
       <Dica titulo="Para quem está sobrecarregada">
         Na matriz clássica de prioridades: <b>importante + urgente</b> → faça agora; <b>importante + não urgente</b> →
-        planeje; <b>pouco importante + urgente</b> → avalie se precisa mesmo fazer; <b>pouco importante + não urgente</b> →
-        deixe para depois.
+        planeje; <b>pouco importante + urgente</b> → avalie a necessidade; <b>pouco importante + não urgente</b> →
+        deixe para outro momento.
       </Dica>
     </>
   );
@@ -332,7 +332,7 @@ function Experimentos() {
   return (
     <>
       <Cabecalho num="06" kicker="Bônus · Experimentos de carreira" titulo="Você não precisa decidir. Você pode testar.">
-        Um experimento é uma ação pequena, com prazo, para descobrir se uma área faz sentido para você.
+        Um experimento é uma ação de curto prazo que ajuda a avaliar, na prática, se uma área combina com seus objetivos.
       </Cabecalho>
       <div className="exps">
         {exps.map((_, i) => (
@@ -366,9 +366,9 @@ function Experimentos() {
       <div className="card card--dark">
         <span className="mono pink">Depois do experimento, pergunte-se</span>
         <ul className="checks">{REFLEXAO.map((q) => <li key={q}>{q}</li>)}</ul>
-        <p className="small">Essas perguntas vão no seu PDF para você responder quando terminar o teste.</p>
+        <p className="small">Essas perguntas estarão no PDF para orientar sua reflexão ao final do experimento.</p>
       </div>
-      <Dica>Isso é muito mais realista do que tentar descobrir “a profissão certa”.</Dica>
+      <Dica>Experimentar possibilidades é mais realista do que tentar encontrar uma única “profissão certa”.</Dica>
     </>
   );
 }
@@ -383,7 +383,7 @@ function Plano() {
   return (
     <>
       <Cabecalho num="07" kicker="One-pager" titulo="Meu plano de carreira">
-        Revise e ajuste: trouxemos suas respostas das etapas anteriores. Depois é só baixar o PDF.
+        Revise as respostas reunidas nas etapas anteriores, faça os ajustes necessários e baixe o plano em PDF.
       </Cabecalho>
       <div className="plano-actions">
         <button type="button" className="btn btn--sm btn--outline" onClick={preencher}>↺ Preencher campos vazios com minhas respostas</button>
@@ -403,7 +403,7 @@ function Plano() {
       <div className="download">
         <div>
           <h2 className="h2">Pronto! 🎉</h2>
-          <p>Você saiu com seu plano de carreira começado. Baixe o PDF com o one-pager e o detalhamento de todos os exercícios.</p>
+          <p>Seu plano de carreira está estruturado. Baixe o PDF com o resumo executivo e o detalhamento dos exercícios.</p>
         </div>
         <button type="button" className="btn btn--primary btn--lg" id="btn-pdf" onClick={baixar} disabled={gerandoPdf}>
           {gerandoPdf ? 'Gerando PDF…' : 'Baixar meu PDF'}

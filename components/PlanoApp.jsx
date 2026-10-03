@@ -84,7 +84,7 @@ export default function PlanoApp() {
     try {
       const { baixarPdf } = await import('@/lib/pdf');
       await baixarPdf(state);
-      toast('PDF baixado! 💗');
+      toast('PDF baixado com sucesso! 💗');
     } catch (err) {
       console.error(err);
       toast('Não foi possível gerar o PDF. Tente novamente.');
@@ -98,7 +98,7 @@ export default function PlanoApp() {
     limparEstado();
     setState(estadoInicial());
     window.scrollTo({ top: 0 });
-    toast('Tudo limpo. Vamos recomeçar!');
+    toast('Respostas apagadas. Você já pode recomeçar!');
   };
 
   const ctx = useMemo(
@@ -156,7 +156,7 @@ export default function PlanoApp() {
               ← Voltar
             </button>
             <span className={`save-status mono${salvo ? ' is-saved' : ''}`}>
-              {salvo ? 'Salvo ✓' : 'Respostas salvas neste navegador'}
+              {salvo ? 'Alterações salvas ✓' : 'Salvamento automático'}
             </span>
             <button className="btn btn--primary" type="button" id="btn-next" onClick={() => irPara(passo + 1)}
               style={{ visibility: passo === PASSOS.length - 1 ? 'hidden' : 'visible' }}>
@@ -169,7 +169,7 @@ export default function PlanoApp() {
       <footer className="footer">
         <div className="container footer__inner">
           <Image src={borboleta} alt="" width={28} height={25} />
-          <p>Suas respostas ficam apenas neste navegador (localStorage) — nada é enviado para servidores.</p>
+          <p>O processamento é privado no seu navegador. Nada é compartilhado externamente.</p>
           <a className="mono" href="https://www.womakerscode.org" target="_blank" rel="noopener noreferrer">womakerscode.org</a>
         </div>
       </footer>
