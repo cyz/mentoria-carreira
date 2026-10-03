@@ -29,12 +29,9 @@ npm run build   # gera o site estático em out/
 
 ### Publicar no GitHub Pages
 
-```bash
-npm run deploy
-```
-
-O script `scripts/deploy.sh` gera o site com `NEXT_PUBLIC_BASE_PATH=/<repositório>` e publica a pasta `out/` no
-branch `gh-pages`, que é a fonte do GitHub Pages.
+O deploy é feito pelo GitHub Actions (`.github/workflows/deploy.yml`) a cada push na `main`, ou manualmente em
+**Actions → Deploy no GitHub Pages → Run workflow**. O workflow define `NEXT_PUBLIC_BASE_PATH` com o caminho do
+repositório no Pages e publica a pasta `out/`.
 
 ## Créditos
 

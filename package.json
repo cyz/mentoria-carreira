@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "npx serve out",
-    "deploy": "bash scripts/deploy.sh"
+    "start": "npx serve out"
   },
   "dependencies": {
     "jspdf": "^4.2.1",
