@@ -1,6 +1,6 @@
 'use client';
 
-import { DIMENSOES, QUADRANTES, quadrante } from '@/lib/data';
+import { DIMENSOES, QUADRANTES, notaTexto, quadrante } from '@/lib/data';
 import { useApp } from './ui';
 
 export function RadarChart() {
@@ -19,13 +19,16 @@ export function RadarChart() {
       ))}
       {DIMENSOES.map((d, i) => { const [x, y] = pt(i, 5); return <line key={d.id} x1={c} y1={c} x2={x} y2={y} className="radar__axis" />; })}
       <polygon points={DIMENSOES.map((d, i) => pt(i, nota(d)).join(',')).join(' ')} className="radar__data" />
-      {DIMENSOES.map((d, i) => { const [x, y] = pt(i, nota(d)); return <circle key={d.id} cx={x} cy={y} r="4.5" className="radar__dot" />; })}
+      {DIMENSOES.filter((d) => nota(d)).map((d) => {
+        const [x, y] = pt(DIMENSOES.indexOf(d), nota(d));
+        return <circle key={d.id} cx={x} cy={y} r="4.5" className="radar__dot" />;
+      })}
       {DIMENSOES.map((d, i) => {
         const [x, y] = pt(i, 6.3);
         const anchor = Math.abs(x - c) < 5 ? 'middle' : x > c ? 'start' : 'end';
         return (
           <text key={d.id} x={x} y={y} textAnchor={anchor} dominantBaseline="middle" className="radar__label">
-            {d.nome}<tspan x={x} dy="15" className="radar__val">{nota(d)}/5</tspan>
+            {d.nome}<tspan x={x} dy="15" className="radar__val">{notaTexto(state.radar[d.id].nota)}</tspan>
           </text>
         );
       })}

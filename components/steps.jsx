@@ -4,27 +4,36 @@ import { useState } from 'react';
 import Image from 'next/image';
 import {
   DIMENSOES, GAPS, FASES, CADEIA, NIVEIS, EXEMPLOS_MATRIZ, EXEMPLOS_EXPERIMENTO, REFLEXAO, PLANO_CAMPOS, PROXIMO,
+  DIARIO, DIARIO_ENERGIA, novoExperimento, notaTexto, tituloDoPlano,
 } from '@/lib/data';
-import { preencherVazios } from '@/lib/state';
+import { duracaoReconhecida, formatarCurta, semanasDiario } from '@/lib/datas';
+import {
+  MAX_EXPERIMENTOS, camposDesatualizados, preencherVazios, resolverDesatualizados,
+} from '@/lib/state';
 import borboleta from '@/assets/img/borboleta.png';
-import { Campo, Cabecalho, Dica, useApp } from './ui';
+import { Campo, CabecalhoEtapa, Dica, DicaEtapa, useApp } from './ui';
 import { RadarChart, MatrizChart, ResumoQuadrantes } from './charts';
+import { CONTEUDO, FRASE, ROADMAP } from './conteudo';
 
 export const MAX_POR_FASE = 3;
-const MAX_EXPERIMENTOS = 3;
 
 function Inicio() {
+  const { state, abrirPlanos } = useApp();
   return (
     <>
       <div className="hero">
         <div>
-          <span className="kicker mono">Mentoria de carreira · WoMakersCode</span>
+          <span className="kicker mono">{CONTEUDO.inicio.kicker}</span>
           <h1 className="hero__title">Plano de carreira: <em>da intenção à ação</em></h1>
-          <blockquote className="hero__quote">Você não precisa ter todas as respostas. Precisa saber qual é o próximo passo.</blockquote>
+          <blockquote className="hero__quote">{FRASE}</blockquote>
         </div>
         <Image className="hero__img" src={borboleta} alt="" width={160} height={142} priority />
       </div>
       <div className="card">
+        <div className="plano-atual">
+          <span className="muted">Você está preenchendo o plano <b>“{tituloDoPlano(state)}”</b>.</span>
+          <button type="button" className="btn btn--sm btn--outline" onClick={abrirPlanos}>Meus planos</button>
+        </div>
         <div className="grid grid--2">
           <Campo path="nome" label="Seu nome" placeholder="Como você quer aparecer no seu plano" />
           <Campo path="data" label="Data da mentoria" type="date" />
@@ -32,20 +41,9 @@ function Inicio() {
       </div>
       <h2 className="h2">O caminho de hoje</h2>
       <ol className="roadmap">
-        {[
-          ['Radar de carreira', 'O que eu quero?'],
-          ['Onde estou hoje', 'O que eu já tenho e o que falta?'],
-          ['Career Gap', '5 vagas → requisitos → 3 prioridades'],
-          ['30-60-90', 'Transforme o gap em ação'],
-          ['Impacto × Esforço', 'Não tente fazer tudo'],
-          ['Experimentos', 'Você não precisa decidir. Pode testar.'],
-          ['Meu plano', 'Seu one-pager em PDF'],
-        ].map(([t, s]) => <li key={t}><b>{t}</b><span>{s}</span></li>)}
+        {ROADMAP.map(([t, sub]) => <li key={t}><b>{t}</b><span>{sub}</span></li>)}
       </ol>
-      <Dica titulo="Como funciona">
-        Responda com frases curtas e honestas — não é preciso ter tudo definido agora. Seu progresso é salvo
-        automaticamente e, ao final, você poderá baixar um PDF com o plano completo.
-      </Dica>
+      <DicaEtapa etapa="inicio" />
     </>
   );
 }
@@ -54,22 +52,25 @@ function Radar() {
   const { state, set } = useApp();
   return (
     <>
-      <Cabecalho num="01" kicker="Ferramenta · Radar de carreira" titulo="Onde quero chegar?">
-        Reflita sobre cada dimensão e indique o quanto ela está <b>clara para você hoje</b> (1 = nada clara; 5 = muito clara).
-      </Cabecalho>
+      <CabecalhoEtapa etapa="radar" />
       <div className="radar-layout">
         <div className="radar-fields">
           {DIMENSOES.map((d) => (
             <div key={d.id} className="dim card">
               <div className="dim__head"><strong>{d.nome}</strong><span className="muted">{d.pergunta}</span></div>
               <Campo path={`radar.${d.id}.texto`} rows={2} placeholder={d.placeholder} aria={d.pergunta} />
-              <label className="range">
-                <span className="mono">Clareza</span>
-                <input type="range" min="1" max="5" step="1" value={state.radar[d.id].nota}
-                  data-path={`radar.${d.id}.nota`} aria-label={`Clareza de ${d.nome}`}
-                  onChange={(e) => set(`radar.${d.id}.nota`, Number(e.target.value))} />
-                <output className="mono">{state.radar[d.id].nota}/5</output>
-              </label>
+              <fieldset className="seg seg--nota" data-path={`radar.${d.id}.nota`}>
+                <legend className="mono">Clareza</legend>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <label key={n}>
+                    <input type="radio" name={`nota-${d.id}`} value={n} checked={state.radar[d.id].nota === n}
+                      aria-label={`Clareza de ${d.nome}: ${n} de 5`}
+                      onChange={() => set(`radar.${d.id}.nota`, n)} />
+                    <span>{n}</span>
+                  </label>
+                ))}
+                <output className="mono muted">{state.radar[d.id].nota ? notaTexto(state.radar[d.id].nota) : 'Não avaliada'}</output>
+              </fieldset>
             </div>
           ))}
         </div>
@@ -80,10 +81,7 @@ function Radar() {
           </div>
         </div>
       </div>
-      <Dica>
-        Não escolha uma carreira considerando apenas o que você gosta. Busque a interseção entre{' '}
-        <b>o que você gosta</b>, <b>o que você consegue desenvolver</b> e <b>onde existe uma oportunidade real</b>.
-      </Dica>
+      <DicaEtapa etapa="radar" />
       <div className="card card--accent">
         <Campo path="direcao" label="Minha direção" rows={2}
           placeholder="Quero me aproximar de… (ex.: análise de dados em empresas de saúde)"
@@ -96,9 +94,7 @@ function Radar() {
 function Hoje() {
   return (
     <>
-      <Cabecalho num="02" kicker="Diagnóstico" titulo="Onde estou hoje?">
-        Observe seu momento atual sem julgamentos: todas as suas experiências fazem parte dessa trajetória.
-      </Cabecalho>
+      <CabecalhoEtapa etapa="hoje" />
       <div className="card">
         <Campo path="hoje.situacao" label="Meu momento atual" placeholder="Ex.: analista administrativa há 4 anos, estudando programação" />
       </div>
@@ -106,10 +102,7 @@ function Hoje() {
         <div className="card"><Campo path="hoje.tenho" label="O que eu já tenho?" rows={6} placeholder="Competências, experiências, formações, projetos, relações, conquistas…" /></div>
         <div className="card"><Campo path="hoje.falta" label="O que está faltando?" rows={6} placeholder="Conhecimentos, experiências, contatos, evidências…" /></div>
       </div>
-      <Dica>
-        Competências desenvolvidas em outras áreas podem ser transferíveis. Comunicação, organização, negociação e
-        resolução de problemas, por exemplo, são relevantes em diferentes carreiras.
-      </Dica>
+      <DicaEtapa etapa="hoje" />
     </>
   );
 }
@@ -118,9 +111,7 @@ function Gap() {
   const { state } = useApp();
   return (
     <>
-      <Cabecalho num="03" kicker="Ferramenta · Career Gap" titulo="Encontre seu Career Gap">
-        Compare seu momento atual com o objetivo profissional e identifique o que precisa ser desenvolvido.
-      </Cabecalho>
+      <CabecalhoEtapa etapa="gap" />
       <div className="flow">
         <div className="flow__item">
           <span className="mono">Onde estou</span>
@@ -133,10 +124,7 @@ function Gap() {
         <div className="flow__arrow" aria-hidden="true">→</div>
         <div className="flow__item flow__item--accent"><span className="mono">O que falta?</span><p>Investigue as demandas do mercado ↓</p></div>
       </div>
-      <Dica titulo="Dica prática">
-        Antes de incluir “fazer um curso” no plano, analise <b>5 vagas</b> relacionadas ao cargo desejado e identifique
-        os requisitos mais recorrentes.
-      </Dica>
+      <DicaEtapa etapa="gap" />
       <div className="pipeline mono" aria-hidden="true">
         <span>5 vagas</span>→<span>requisitos recorrentes</span>→<span>3 competências prioritárias</span>→<span>plano de desenvolvimento</span>
       </div>
@@ -217,9 +205,7 @@ function Acao() {
     .filter((t) => /curso|certifica|aula|forma[cç][aã]o|bootcamp|workshop|treinamento/i.test(t)).length;
   return (
     <>
-      <Cabecalho num="04" kicker="Ferramenta · 30-60-90" titulo="Transforme o gap em ação">
-        Um plano objetivo e viável gera mais resultados do que um PDI extenso e difícil de executar.
-      </Cabecalho>
+      <CabecalhoEtapa etapa="acao" />
       <h2 className="h2">Objetivo → Gap → Ação → Evidência → Prazo</h2>
       <div className="chain">
         {CADEIA.map((c, i) => (
@@ -235,10 +221,7 @@ function Acao() {
       {cursos >= 3 && (
         <Dica titulo="Atenção">Você incluiu {cursos} ações relacionadas a cursos. Considere substituir alguma delas por prática ou produção de evidências.</Dica>
       )}
-      <Dica>
-        <b>Evite transformar seu plano de carreira em uma lista extensa de cursos.</b> Em uma transição, experiências
-        práticas e evidências concretas também são fundamentais.
-      </Dica>
+      <DicaEtapa etapa="acao" />
     </>
   );
 }
@@ -264,9 +247,7 @@ function Matriz() {
 
   return (
     <>
-      <Cabecalho num="05" kicker="Ferramenta · Matriz de prioridade" titulo="Não tente fazer tudo">
-        Avalie quais ações podem gerar <b>maior impacto</b> na sua carreira com <b>menor esforço</b> inicial.
-      </Cabecalho>
+      <CabecalhoEtapa etapa="matriz" />
       <div className="matriz-layout">
         <div>
           <div className="mx-actions">
@@ -275,7 +256,6 @@ function Matriz() {
           </div>
           <div className="mx-list">
             {state.matriz.length ? state.matriz.map((m, i) => (
-              // eslint-disable-next-line react/no-array-index-key
               <div key={i} className="mx-row card">
                 <div className="mx-row__top">
                   <span className="mx-row__n">{i + 1}</span>
@@ -302,11 +282,7 @@ function Matriz() {
         <div className="card card--sticky"><MatrizChart /></div>
       </div>
       <ResumoQuadrantes />
-      <Dica titulo="Para quem está sobrecarregada">
-        Na matriz clássica de prioridades: <b>importante + urgente</b> → faça agora; <b>importante + não urgente</b> →
-        planeje; <b>pouco importante + urgente</b> → avalie a necessidade; <b>pouco importante + não urgente</b> →
-        deixe para outro momento.
-      </Dica>
+      <DicaEtapa etapa="matriz" />
     </>
   );
 }
@@ -314,7 +290,7 @@ function Matriz() {
 function Experimentos() {
   const { state, update, toast } = useApp();
   const exps = state.experimentos;
-  const adicionar = () => update((s) => ({ ...s, experimentos: [...s.experimentos, { area: '', duracao: '', acao: '' }] }));
+  const adicionar = () => update((s) => ({ ...s, experimentos: [...s.experimentos, novoExperimento()] }));
   const remover = (i) => update((s) => ({ ...s, experimentos: s.experimentos.filter((_, j) => j !== i) }));
   const usarExemplo = (ex) => {
     const vazio = exps.findIndex((e) => !e.area && !e.duracao && !e.acao);
@@ -324,33 +300,43 @@ function Experimentos() {
     }
     update((s) => {
       const lista = [...s.experimentos];
-      if (vazio >= 0) lista[vazio] = { ...ex }; else lista.push({ ...ex });
+      if (vazio >= 0) lista[vazio] = { ...lista[vazio], ...ex }; else lista.push({ ...novoExperimento(), ...ex });
       return { ...s, experimentos: lista };
     });
   };
 
   return (
     <>
-      <Cabecalho num="06" kicker="Bônus · Experimentos de carreira" titulo="Você não precisa decidir. Você pode testar.">
-        Um experimento é uma ação de curto prazo que ajuda a avaliar, na prática, se uma área combina com seus objetivos.
-      </Cabecalho>
+      <CabecalhoEtapa etapa="experimento" />
       <div className="exps">
-        {exps.map((_, i) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={i} className="exp card">
-            <div className="exp__head">
-              <span className="mono">Experimento {i + 1}</span>
-              {exps.length > 1 && (
-                <button type="button" className="icon-btn" onClick={() => remover(i)} aria-label={`Remover experimento ${i + 1}`}>×</button>
+        {exps.map((e, i) => {
+          const semanas = semanasDiario(e, state.data);
+          const ultima = semanas[semanas.length - 1];
+          return (
+            <div key={i} className="exp card">
+              <div className="exp__head">
+                <span className="mono">Experimento {i + 1}</span>
+                {exps.length > 1 && (
+                  <button type="button" className="icon-btn" onClick={() => remover(i)} aria-label={`Remover experimento ${i + 1}`}>×</button>
+                )}
+              </div>
+              <div className="exp__sentence">
+                <Campo path={`experimentos.${i}.area`} label="Quero explorar" placeholder="Área ou tema" />
+                <Campo path={`experimentos.${i}.duracao`} label="Durante" placeholder="Ex.: 2 semanas" />
+                <Campo path={`experimentos.${i}.inicio`} label={<>A partir de <span className="muted">(opcional)</span></>} type="date" />
+                <Campo path={`experimentos.${i}.acao`} label="Vou" placeholder="Ex.: conversar com duas pessoas da área" className="field--wide" />
+              </div>
+              {(e.area || e.acao || e.duracao) && (
+                <p className="exp__diario small">
+                  <span className="mono">Diário</span>
+                  {semanas.length} {semanas.length > 1 ? 'semanas' : 'semana'} de registro, de {formatarCurta(semanas[0].inicio)} a {formatarCurta(ultima.fim)}
+                  {!e.inicio && ', contando a partir da data da mentoria'}
+                  {!duracaoReconhecida(e.duracao) && ' (escreva a duração como “3 semanas” ou “1 mês” para ajustar)'}
+                </p>
               )}
             </div>
-            <div className="exp__sentence">
-              <Campo path={`experimentos.${i}.area`} label="Quero explorar" placeholder="Área ou tema" />
-              <Campo path={`experimentos.${i}.duracao`} label="Durante" placeholder="Ex.: 2 semanas" />
-              <Campo path={`experimentos.${i}.acao`} label="Vou" placeholder="Ex.: conversar com duas pessoas da área" className="field--wide" />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {exps.length < MAX_EXPERIMENTOS && (
         <button type="button" className="btn btn--dark" onClick={adicionar}>+ Adicionar experimento</button>
@@ -363,63 +349,120 @@ function Experimentos() {
           </button>
         ))}
       </div>
-      <div className="card card--dark">
-        <span className="mono pink">Depois do experimento, pergunte-se</span>
-        <ul className="checks">{REFLEXAO.map((q) => <li key={q}>{q}</li>)}</ul>
-        <p className="small">Essas perguntas estarão no PDF para orientar sua reflexão ao final do experimento.</p>
+      <div className="grid grid--2 diario-grid">
+        <div className="card card--dark">
+          <span className="mono pink">Toda semana, durante o experimento</span>
+          <ul className="diario-perguntas">
+            {DIARIO.map((d) => <li key={d.id}>{d.pergunta}</li>)}
+            <li>{DIARIO_ENERGIA}</li>
+          </ul>
+        </div>
+        <div className="card card--dark">
+          <span className="mono pink">Ao final, pergunte-se</span>
+          <ul className="checks">{REFLEXAO.map((q) => <li key={q}>{q}</li>)}</ul>
+        </div>
       </div>
-      <Dica>Experimentar possibilidades é mais realista do que tentar encontrar uma única “profissão certa”.</Dica>
+      <p className="muted small">
+        O diário semanal, com as datas de cada semana, e as perguntas finais estarão no seu PDF e no Markdown.
+      </p>
+      <DicaEtapa etapa="experimento" />
     </>
   );
 }
 
+function AvisoDesatualizado({ campo }) {
+  const { update } = useApp();
+  if (!campo) return null;
+  const resolver = (aplicar) => update((s) => resolverDesatualizados(s, [campo.path], aplicar));
+  return (
+    <div className="aviso" role="note">
+      <span>Sua resposta de origem mudou para: <i>“{campo.nova}”</i></span>
+      <span className="aviso__acoes">
+        <button type="button" className="link-btn" onClick={() => resolver(true)}>Atualizar</button>
+        <button type="button" className="link-btn" onClick={() => resolver(false)}>Manter</button>
+      </span>
+    </div>
+  );
+}
+
 function Plano() {
-  const { state, update, toast, baixar, gerandoPdf } = useApp();
+  const { state, update, toast, baixar, gerandoPdf, baixarMarkdown, copiarMarkdown } = useApp();
+  const desatualizados = camposDesatualizados(state);
+  const porPath = Object.fromEntries(desatualizados.map((c) => [c.path, c]));
   const preencher = () => {
     const { state: novo, n } = preencherVazios(state);
     update(() => novo);
     toast(n ? `${n} campo(s) preenchido(s) com suas respostas.` : 'Nenhum campo vazio para preencher.');
   };
+  const resolverTodos = (aplicar) => {
+    update((s) => resolverDesatualizados(s, desatualizados.map((c) => c.path), aplicar));
+    toast(aplicar ? 'Campos atualizados com suas respostas mais recentes.' : 'Seu texto foi mantido.');
+  };
   return (
     <>
-      <Cabecalho num="07" kicker="One-pager" titulo="Meu plano de carreira">
-        Revise as respostas reunidas nas etapas anteriores, faça os ajustes necessários e baixe o plano em PDF.
-      </Cabecalho>
+      <CabecalhoEtapa etapa="plano" />
       <div className="plano-actions">
         <button type="button" className="btn btn--sm btn--outline" onClick={preencher}>↺ Preencher campos vazios com minhas respostas</button>
       </div>
+      {desatualizados.length > 0 && (
+        <div className="aviso aviso--geral" role="status">
+          <span>
+            <b>{desatualizados.length} {desatualizados.length > 1 ? 'campos usam respostas' : 'campo usa uma resposta'}</b>{' '}
+            que você mudou nas etapas anteriores.
+          </span>
+          <span className="aviso__acoes">
+            <button type="button" className="btn btn--sm btn--dark" onClick={() => resolverTodos(true)}>Atualizar todos</button>
+            <button type="button" className="btn btn--sm btn--outline" onClick={() => resolverTodos(false)}>Manter como está</button>
+          </span>
+        </div>
+      )}
       <div className="plano">
         {PLANO_CAMPOS.map((p, i) => (
-          <div key={p.id} className="plano__item card">
+          <div key={p.id} className={`plano__item card${porPath[`plano.${p.id}`] ? ' is-stale' : ''}`}>
             <span className="plano__n mono">{String(i + 1).padStart(2, '0')}</span>
             <Campo path={`plano.${p.id}`} label={<>{p.titulo}<span className="muted"> · {p.prompt}</span></>} rows={3} />
+            <AvisoDesatualizado campo={porPath[`plano.${p.id}`]} />
           </div>
         ))}
       </div>
       <div className="card card--dark proximo">
         <span className="mono pink">Meu próximo passo</span>
-        {PROXIMO.map((p) => <Campo key={p.id} path={`proximo.${p.id}`} label={`${p.prompt}…`} rows={2} />)}
+        {PROXIMO.map((p) => (
+          <div key={p.id}>
+            <Campo path={`proximo.${p.id}`} label={`${p.prompt}…`} rows={2} />
+            <AvisoDesatualizado campo={porPath[`proximo.${p.id}`]} />
+          </div>
+        ))}
       </div>
       <div className="download">
         <div>
           <h2 className="h2">Pronto! 🎉</h2>
-          <p>Seu plano de carreira está estruturado. Baixe o PDF com o resumo executivo e o detalhamento dos exercícios.</p>
+          <p>
+            Baixe o PDF com o resumo executivo, o detalhamento dos exercícios e o diário semanal dos experimentos.
+            Prefere editar no Notion ou no GitHub? Use o Markdown.
+          </p>
         </div>
-        <button type="button" className="btn btn--primary btn--lg" id="btn-pdf" onClick={baixar} disabled={gerandoPdf}>
-          {gerandoPdf ? 'Gerando PDF…' : 'Baixar meu PDF'}
-        </button>
+        <div className="download__acoes">
+          <button type="button" className="btn btn--primary btn--lg" id="btn-pdf" onClick={baixar} disabled={gerandoPdf}>
+            {gerandoPdf ? 'Gerando PDF…' : 'Baixar meu PDF'}
+          </button>
+          <div className="download__md">
+            <button type="button" className="btn btn--sm btn--outline" onClick={baixarMarkdown}>Baixar Markdown (.md)</button>
+            <button type="button" className="btn btn--sm btn--outline" onClick={copiarMarkdown}>Copiar Markdown</button>
+          </div>
+        </div>
       </div>
     </>
   );
 }
 
 export const PASSOS = [
-  { id: 'inicio', label: 'Início', Componente: Inicio },
-  { id: 'radar', label: 'Radar', Componente: Radar },
-  { id: 'hoje', label: 'Onde estou', Componente: Hoje },
-  { id: 'gap', label: 'Career Gap', Componente: Gap },
-  { id: 'acao', label: '30-60-90', Componente: Acao },
-  { id: 'matriz', label: 'Prioridades', Componente: Matriz },
-  { id: 'experimento', label: 'Experimentos', Componente: Experimentos },
-  { id: 'plano', label: 'Meu plano', Componente: Plano },
-];
+  { id: 'inicio', Componente: Inicio },
+  { id: 'radar', Componente: Radar },
+  { id: 'hoje', Componente: Hoje },
+  { id: 'gap', Componente: Gap },
+  { id: 'acao', Componente: Acao },
+  { id: 'matriz', Componente: Matriz },
+  { id: 'experimento', Componente: Experimentos },
+  { id: 'plano', Componente: Plano },
+].map((p) => ({ ...p, label: CONTEUDO[p.id].label }));

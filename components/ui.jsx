@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useId } from 'react';
 import { getPath } from '@/lib/state';
+import { CONTEUDO } from './conteudo';
 
 export const AppContext = createContext(null);
 export const useApp = () => useContext(AppContext);
@@ -34,6 +35,17 @@ export function Dica({ titulo = 'Dica', children }) {
       <p>{children}</p>
     </aside>
   );
+}
+
+/* Cabeçalho e dica de uma etapa a partir do conteúdo compartilhado. */
+export function CabecalhoEtapa({ etapa }) {
+  const c = CONTEUDO[etapa];
+  return <Cabecalho num={c.num} kicker={c.kicker} titulo={c.titulo}>{c.lead}</Cabecalho>;
+}
+
+export function DicaEtapa({ etapa }) {
+  const { dica } = CONTEUDO[etapa];
+  return <Dica titulo={dica.titulo}>{dica.texto}</Dica>;
 }
 
 export function Cabecalho({ num, kicker, titulo, children }) {
